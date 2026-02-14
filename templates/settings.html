@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Einstellungen - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Einstellungen</h1>
+    <p class="page-subtitle">Passe deine täglichen Nährstoff-Limits an</p>
+</div>
+
+<div class="card" style="max-width:800px;">
+    <div class="card-title">Tägliche Limits (empfohlene Einnahmen)</div>
+    <form method="POST">
+        <div class="settings-grid">
+            <div class="form-group">
+                <label class="form-label">Kalorien (kcal)</label>
+                <input type="number" name="calories" class="form-input" value="{{ "%.0f"|format(limits.calories) }}" step="50">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Protein (g)</label>
+                <input type="number" name="protein" class="form-input" value="{{ "%.0f"|format(limits.protein) }}" step="5">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kohlenhydrate (g)</label>
+                <input type="number" name="carbs" class="form-input" value="{{ "%.0f"|format(limits.carbs) }}" step="5">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fett (g)</label>
+                <input type="number" name="fat" class="form-input" value="{{ "%.0f"|format(limits.fat) }}" step="5">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ballaststoffe (g)</label>
+                <input type="number" name="fiber" class="form-input" value="{{ "%.0f"|format(limits.fiber) }}" step="1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Zucker (g)</label>
+                <input type="number" name="sugar" class="form-input" value="{{ "%.0f"|format(limits.sugar) }}" step="5">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Natrium (mg)</label>
+                <input type="number" name="sodium" class="form-input" value="{{ "%.0f"|format(limits.sodium) }}" step="100">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gesättigte Fette (g)</label>
+                <input type="number" name="saturated_fat" class="form-input" value="{{ "%.0f"|format(limits.saturated_fat) }}" step="1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cholesterin (mg)</label>
+                <input type="number" name="cholesterol" class="form-input" value="{{ "%.0f"|format(limits.cholesterol) }}" step="10">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kalium (mg)</label>
+                <input type="number" name="potassium" class="form-input" value="{{ "%.0f"|format(limits.potassium) }}" step="100">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Limits speichern</button>
+    </form>
+</div>
+
+<div class="card mt-3" style="max-width:800px;">
+    <div class="card-title">Empfohlene Tageswerte (Erwachsene)</div>
+    <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.8;">
+        <p>Kalorien: 1.800-2.500 kcal &middot; Protein: 46-56g &middot; Kohlenhydrate: 225-325g</p>
+        <p>Fett: 44-78g &middot; Ballaststoffe: 25-30g &middot; Zucker: max. 50g</p>
+        <p>Natrium: max. 2.300mg &middot; Gesättigte Fette: max. 20g &middot; Cholesterin: max. 300mg</p>
+    </div>
+</div>
+{% endblock %}

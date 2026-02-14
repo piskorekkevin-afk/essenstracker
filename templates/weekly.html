@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Wochenplan - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Wochenplan</h1>
+    <p class="page-subtitle">Übersicht deiner Woche</p>
+</div>
+
+<div class="week-grid">
+    {% for day in days %}
+    <div class="day-card {% if day.is_today %}today{% endif %}">
+        <div class="day-name">{{ day.name }}</div>
+        <div class="day-date">{{ day.date.strftime('%d.%m.') }}</div>
+        <div class="day-cal">{{ "%.0f"|format(day.totals.calories) }} kcal</div>
+
+        <div class="stat-bar mb-2">
+            <div class="stat-bar-fill {% if day.totals.calories > limits.calories %}over{% endif %}"
+                 style="width:{{ [day.totals.calories / limits.calories * 100, 100] | min if limits.calories else 0 }}%;background:linear-gradient(90deg,var(--accent),var(--accent-light));"></div>
+        </div>
+
+        {% if day.meals %}
+            {% for meal in day.meals %}
+            <div class="day-meal-mini">
+                {{ meal.name }} <span style="float:right;color:var(--accent-light);">{{ "%.0f"|format(meal.calories) }}</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="font-size:0.75rem;color:var(--text-dim);text-align:center;margin-top:16px;">Keine Einträge</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Weekly Summary -->
+<div class="card mt-3">
+    <div class="card-title">Wochenzusammenfassung</div>
+    <div class="stats-grid">
+        {% set total_cal = days | sum(attribute='totals.calories') %}
+        {% set total_prot = days | sum(attribute='totals.protein') %}
+        {% set total_carbs = days | sum(attribute='totals.carbs') %}
+        {% set total_fat = days | sum(attribute='totals.fat') %}
+        {% set total_fiber = days | sum(attribute='totals.fiber') %}
+        {% set counted_days = days | selectattr('totals.calories', 'greaterthan', 0) | list | length %}
+        <div class="stat-card calories">
+            <div class="stat-label">Durchschn. Kalorien</div>
+            <div class="stat-value">{{ "%.0f"|format(total_cal / counted_days) if counted_days else 0 }}</div>
+            <div class="stat-limit">kcal / Tag</div>
+        </div>
+        <div class="stat-card protein">
+            <div class="stat-label">Durchschn. Protein</div>
+            <div class="stat-value">{{ "%.0f"|format(total_prot / counted_days) if counted_days else 0 }}g</div>
+            <div class="stat-limit">pro Tag</div>
+        </div>
+        <div class="stat-card carbs">
+            <div class="stat-label">Durchschn. Kohlenhydrate</div>
+            <div class="stat-value">{{ "%.0f"|format(total_carbs / counted_days) if counted_days else 0 }}g</div>
+            <div class="stat-limit">pro Tag</div>
+        </div>
+        <div class="stat-card fat">
+            <div class="stat-label">Durchschn. Fett</div>
+            <div class="stat-value">{{ "%.0f"|format(total_fat / counted_days) if counted_days else 0 }}g</div>
+            <div class="stat-limit">pro Tag</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

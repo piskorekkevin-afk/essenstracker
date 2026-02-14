@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Teilen - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Fortschritt teilen</h1>
+    <p class="page-subtitle">Teile deinen Fortschritt mit Freunden und Familie</p>
+</div>
+
+<div class="card" style="max-width:640px;">
+    <div class="card-title">Dein persönlicher Share-Link</div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;">
+        Jeder mit diesem Link kann deine heutigen Mahlzeiten, Wochenverlauf und Ziele sehen.
+    </p>
+    <div class="share-link-box">
+        <input type="text" class="share-link-input" id="shareLink"
+               value="{{ request.host_url }}shared/{{ token }}" readonly>
+        <button class="btn btn-primary" onclick="copyLink()">Kopieren</button>
+    </div>
+    <p id="copyFeedback" style="font-size:0.8rem;color:var(--green);margin-top:8px;display:none;">Link kopiert!</p>
+</div>
+
+<div class="card mt-3" style="max-width:640px;">
+    <div class="card-title">Vorschau</div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;">
+        So sehen andere dein Profil:
+    </p>
+    <a href="{{ url_for('shared_profile', token=token) }}" class="btn btn-secondary" target="_blank">
+        Vorschau öffnen
+    </a>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function copyLink() {
+    const input = document.getElementById('shareLink');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+        const feedback = document.getElementById('copyFeedback');
+        feedback.style.display = 'block';
+        setTimeout(() => feedback.style.display = 'none', 3000);
+    });
+}
+</script>
+{% endblock %}

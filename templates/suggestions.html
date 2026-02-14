@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Vorschläge - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Mahlzeitenvorschläge</h1>
+    <p class="page-subtitle">Personalisierte Empfehlungen basierend auf deinem Essensverlauf</p>
+</div>
+
+<div id="suggestionsContainer">
+    <div class="card text-center" style="padding:48px;">
+        <div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 16px;"></div>
+        <p class="loading-text">KI erstellt personalisierte Vorschläge...</p>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadSuggestions() {
+    const container = document.getElementById('suggestionsContainer');
+    try {
+        const res = await fetch('/api/suggestions');
+        const data = await res.json();
+
+        if (data.length === 0) {
+            container.innerHTML = `
+                <div class="card">
+                    <div class="empty-state">
+                        <div class="empty-icon">&#128161;</div>
+                        <p class="empty-text">Erfasse zuerst einige Mahlzeiten, damit die KI passende Vorschläge machen kann.</p>
+                        <a href="/meal/add" class="btn btn-primary btn-sm">Mahlzeit erfassen</a>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        data.forEach(s => {
+            html += `
+            <div class="suggestion-card">
+                <div class="suggestion-name">${s.name}</div>
+                <div class="suggestion-desc">${s.description}</div>
+                <div class="suggestion-nutrients">
+                    <span class="suggestion-nutrient"><strong>${s.calories || 0}</strong> kcal</span>
+                    <span class="suggestion-nutrient"><strong>${s.protein || 0}g</strong> Protein</span>
+                    <span class="suggestion-nutrient"><strong>${s.carbs || 0}g</strong> Kohlenhydrate</span>
+                    <span class="suggestion-nutrient"><strong>${s.fat || 0}g</strong> Fett</span>
+                    <span class="suggestion-nutrient"><strong>${s.fiber || 0}g</strong> Ballaststoffe</span>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    } catch (e) {
+        container.innerHTML = `
+            <div class="card">
+                <div class="empty-state">
+                    <div class="empty-icon">&#9888;&#65039;</div>
+                    <p class="empty-text">Vorschläge konnten nicht geladen werden. Bitte stelle sicher, dass der ANTHROPIC_API_KEY gesetzt ist.</p>
+                </div>
+            </div>`;
+    }
+}
+loadSuggestions();
+</script>
+{% endblock %}
