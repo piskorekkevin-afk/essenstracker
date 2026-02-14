@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Verlauf - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Verlauf</h1>
+    <p class="page-subtitle">Alle deine erfassten Mahlzeiten</p>
+</div>
+
+<div class="card">
+    {% if meals.items %}
+        {% set current_date = namespace(val=None) %}
+        {% for meal in meals.items %}
+            {% if meal.date != current_date.val %}
+                {% set current_date.val = meal.date %}
+                <div style="padding:12px 0 8px;color:var(--text-muted);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;{% if not loop.first %}border-top:1px solid var(--border);margin-top:8px;{% endif %}">
+                    {{ meal.date.strftime('%A, %d.%m.%Y') }}
+                </div>
+            {% endif %}
+            <div class="meal-item">
+                {% if meal.image_path %}
+                <img src="{{ url_for('uploaded_file', filename=meal.image_path) }}" class="meal-image" alt="{{ meal.name }}">
+                {% else %}
+                <div class="meal-image-placeholder">&#127858;</div>
+                {% endif %}
+                <div class="meal-info">
+                    <div class="meal-name">{{ meal.name }}</div>
+                    <div class="meal-meta">
+                        <span class="badge badge-{{ meal.meal_type }}">{{ meal.meal_type | capitalize }}</span>
+                        &middot; P: {{ "%.0f"|format(meal.protein) }}g &middot; K: {{ "%.0f"|format(meal.carbs) }}g &middot; F: {{ "%.0f"|format(meal.fat) }}g &middot; Bal: {{ "%.0f"|format(meal.fiber) }}g
+                    </div>
+                </div>
+                <div class="meal-calories">{{ "%.0f"|format(meal.calories) }} kcal</div>
+                <form method="POST" action="{{ url_for('delete_meal', meal_id=meal.id) }}" style="display:inline;">
+                    <button type="submit" class="meal-delete" title="Löschen" onclick="return confirm('Mahlzeit wirklich löschen?')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </form>
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if meals.pages > 1 %}
+        <div class="pagination mt-2">
+            {% if meals.has_prev %}
+            <a href="{{ url_for('history', page=meals.prev_num) }}">Zurück</a>
+            {% endif %}
+            {% for p in meals.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+                {% if p %}
+                    {% if p == meals.page %}
+                    <span class="current">{{ p }}</span>
+                    {% else %}
+                    <a href="{{ url_for('history', page=p) }}">{{ p }}</a>
+                    {% endif %}
+                {% else %}
+                <span style="color:var(--text-dim);">...</span>
+                {% endif %}
+            {% endfor %}
+            {% if meals.has_next %}
+            <a href="{{ url_for('history', page=meals.next_num) }}">Weiter</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#128203;</div>
+            <p class="empty-text">Noch keine Mahlzeiten erfasst</p>
+            <a href="{{ url_for('add_meal') }}" class="btn btn-primary btn-sm">Erste Mahlzeit erfassen</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

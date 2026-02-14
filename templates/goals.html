@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Ziele - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header flex justify-between items-center">
+    <div>
+        <h1 class="page-title">Ziele</h1>
+        <p class="page-subtitle">Setze dir Ziele und verfolge deinen Fortschritt</p>
+    </div>
+</div>
+
+<!-- Add Goal Form -->
+<div class="card mb-3">
+    <div class="card-title">Neues Ziel erstellen</div>
+    <form method="POST" action="{{ url_for('add_goal') }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+                <label class="form-label">Titel</label>
+                <input type="text" name="title" class="form-input" placeholder="z.B. 100g Protein täglich" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kategorie</label>
+                <select name="target_type" class="form-input">
+                    <option value="calories">Kalorien</option>
+                    <option value="protein">Protein</option>
+                    <option value="fiber">Ballaststoffe</option>
+                    <option value="weight">Gewicht</option>
+                    <option value="water">Wasser</option>
+                    <option value="custom">Sonstiges</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Zielwert</label>
+                <input type="number" name="target_value" class="form-input" placeholder="z.B. 100" step="0.1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Einheit</label>
+                <input type="text" name="unit" class="form-input" placeholder="z.B. g, kcal, kg">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Beschreibung (optional)</label>
+                <input type="text" name="description" class="form-input" placeholder="Kurze Beschreibung">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Zieldatum (optional)</label>
+                <input type="date" name="end_date" class="form-input">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-1">Ziel erstellen</button>
+    </form>
+</div>
+
+<!-- Active Goals -->
+{% if active_goals %}
+<div class="card mb-3">
+    <div class="card-title">Aktive Ziele</div>
+    {% for goal in active_goals %}
+    <div class="goal-item">
+        <div class="goal-header">
+            <div class="goal-title">{{ goal.title }}</div>
+            <div class="goal-actions">
+                <form method="POST" action="{{ url_for('complete_goal', goal_id=goal.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-success btn-sm" title="Als erreicht markieren">Erreicht</button>
+                </form>
+                <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ziel wirklich löschen?')">Löschen</button>
+                </form>
+            </div>
+        </div>
+        {% if goal.description %}
+        <div class="goal-desc">{{ goal.description }}</div>
+        {% endif %}
+        {% if goal.target_value %}
+        <div class="goal-progress">
+            <div class="goal-progress-fill" style="width: {{ [goal.current_value / goal.target_value * 100, 100] | min if goal.target_value else 0 }}%"></div>
+        </div>
+        <div class="goal-meta">
+            <span>{{ "%.0f"|format(goal.current_value) }} / {{ "%.0f"|format(goal.target_value) }} {{ goal.unit }}</span>
+            <span>{% if goal.end_date %}Bis {{ goal.end_date.strftime('%d.%m.%Y') }}{% endif %}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Completed Goals -->
+{% if completed_goals %}
+<div class="card">
+    <div class="card-title">Erreichte Ziele</div>
+    {% for goal in completed_goals %}
+    <div class="goal-item" style="opacity:0.6;">
+        <div class="goal-header">
+            <div class="goal-title" style="text-decoration:line-through;">{{ goal.title }}</div>
+            <span style="color:var(--green);font-size:0.8rem;font-weight:600;">Erreicht!</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not active_goals and not completed_goals %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon">&#127919;</div>
+        <p class="empty-text">Noch keine Ziele gesetzt</p>
+        <p style="color:var(--text-dim);font-size:0.85rem;">Erstelle oben dein erstes Ziel!</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

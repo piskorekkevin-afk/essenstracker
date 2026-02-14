@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Mahlzeit erfassen - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Mahlzeit erfassen</h1>
+    <p class="page-subtitle">Lade ein Foto hoch und die KI erkennt deine Mahlzeit automatisch</p>
+</div>
+
+<div class="card" style="max-width:640px;">
+    <form method="POST" enctype="multipart/form-data" id="mealForm">
+        <!-- Upload -->
+        <div class="form-group">
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" name="image" id="imageInput" accept="image/*" capture="environment">
+                <div class="upload-icon">&#128247;</div>
+                <p class="upload-text"><strong>Klicke oder ziehe</strong> ein Foto hierher<br>oder nutze die Kamera</p>
+                <img id="preview" class="upload-preview" alt="Vorschau">
+            </div>
+        </div>
+
+        <!-- Meal Type -->
+        <div class="form-group">
+            <label class="form-label">Mahlzeit-Typ</label>
+            <select name="meal_type" class="form-input">
+                <option value="breakfast">Frühstück</option>
+                <option value="lunch" selected>Mittagessen</option>
+                <option value="dinner">Abendessen</option>
+                <option value="snack">Snack</option>
+            </select>
+        </div>
+
+        <!-- Manual fallback fields (hidden by default, shown if no image) -->
+        <div id="manualFields" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Name der Mahlzeit</label>
+                <input type="text" name="name" class="form-input" placeholder="z.B. Caesar Salad">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Beschreibung</label>
+                <textarea name="description" class="form-input" placeholder="Optionale Beschreibung"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label class="form-label">Kalorien (kcal)</label>
+                    <input type="number" name="calories" class="form-input" placeholder="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Protein (g)</label>
+                    <input type="number" name="protein" class="form-input" placeholder="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kohlenhydrate (g)</label>
+                    <input type="number" name="carbs" class="form-input" placeholder="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fett (g)</label>
+                    <input type="number" name="fat" class="form-input" placeholder="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ballaststoffe (g)</label>
+                    <input type="number" name="fiber" class="form-input" placeholder="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Zucker (g)</label>
+                    <input type="number" name="sugar" class="form-input" placeholder="0" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-1 mt-2">
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" style="flex:1;">
+                Mahlzeit speichern
+            </button>
+            <button type="button" class="btn btn-secondary" id="toggleManual">
+                Manuell eingeben
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading" style="display:none;">
+    <div class="spinner"></div>
+    <div class="loading-text">KI analysiert deine Mahlzeit...</div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const uploadZone = document.getElementById('uploadZone');
+const imageInput = document.getElementById('imageInput');
+const preview = document.getElementById('preview');
+const manualFields = document.getElementById('manualFields');
+const toggleBtn = document.getElementById('toggleManual');
+const form = document.getElementById('mealForm');
+const loading = document.getElementById('loading');
+
+// Image preview
+imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+
+// Drag and drop
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        imageInput.files = e.dataTransfer.files;
+        imageInput.dispatchEvent(new Event('change'));
+    }
+});
+
+// Toggle manual
+let manualVisible = false;
+toggleBtn.addEventListener('click', () => {
+    manualVisible = !manualVisible;
+    manualFields.style.display = manualVisible ? 'block' : 'none';
+    toggleBtn.textContent = manualVisible ? 'Foto nutzen' : 'Manuell eingeben';
+});
+
+// Show loading on submit when image is present
+form.addEventListener('submit', () => {
+    if (imageInput.files && imageInput.files[0]) {
+        loading.style.display = 'flex';
+    }
+});
+</script>
+{% endblock %}

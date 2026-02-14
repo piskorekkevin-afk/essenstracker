@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - EssenTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Hallo, {{ current_user.username }}!</h1>
+    <p class="page-subtitle">Dein Überblick für heute, {{ now().strftime('%d.%m.%Y') if now is defined else '' }}</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card calories">
+        <div class="stat-label">Kalorien</div>
+        <div class="stat-value">{{ "%.0f"|format(totals.calories) }}</div>
+        <div class="stat-limit">von {{ "%.0f"|format(limits.calories) }} kcal</div>
+        <div class="stat-bar">
+            <div class="stat-bar-fill {% if totals.calories > limits.calories %}over{% endif %}"
+                 style="width: {{ [totals.calories / limits.calories * 100, 100] | min if limits.calories else 0 }}%"></div>
+        </div>
+    </div>
+    <div class="stat-card protein">
+        <div class="stat-label">Protein</div>
+        <div class="stat-value">{{ "%.0f"|format(totals.protein) }}g</div>
+        <div class="stat-limit">von {{ "%.0f"|format(limits.protein) }}g</div>
+        <div class="stat-bar">
+            <div class="stat-bar-fill {% if totals.protein > limits.protein %}over{% endif %}"
+                 style="width: {{ [totals.protein / limits.protein * 100, 100] | min if limits.protein else 0 }}%"></div>
+        </div>
+    </div>
+    <div class="stat-card carbs">
+        <div class="stat-label">Kohlenhydrate</div>
+        <div class="stat-value">{{ "%.0f"|format(totals.carbs) }}g</div>
+        <div class="stat-limit">von {{ "%.0f"|format(limits.carbs) }}g</div>
+        <div class="stat-bar">
+            <div class="stat-bar-fill {% if totals.carbs > limits.carbs %}over{% endif %}"
+                 style="width: {{ [totals.carbs / limits.carbs * 100, 100] | min if limits.carbs else 0 }}%"></div>
+        </div>
+    </div>
+    <div class="stat-card fat">
+        <div class="stat-label">Fett</div>
+        <div class="stat-value">{{ "%.0f"|format(totals.fat) }}g</div>
+        <div class="stat-limit">von {{ "%.0f"|format(limits.fat) }}g</div>
+        <div class="stat-bar">
+            <div class="stat-bar-fill {% if totals.fat > limits.fat %}over{% endif %}"
+                 style="width: {{ [totals.fat / limits.fat * 100, 100] | min if limits.fat else 0 }}%"></div>
+        </div>
+    </div>
+    <div class="stat-card fiber">
+        <div class="stat-label">Ballaststoffe</div>
+        <div class="stat-value">{{ "%.0f"|format(totals.fiber) }}g</div>
+        <div class="stat-limit">von {{ "%.0f"|format(limits.fiber) }}g</div>
+        <div class="stat-bar">
+            <div class="stat-bar-fill {% if totals.fiber > limits.fiber %}over{% endif %}"
+                 style="width: {{ [totals.fiber / limits.fiber * 100, 100] | min if limits.fiber else 0 }}%"></div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Today's Meals -->
+    <div class="card">
+        <div class="card-title">Heutige Mahlzeiten</div>
+        {% if meals %}
+            {% for meal in meals %}
+            <div class="meal-item">
+                {% if meal.image_path %}
+                <img src="{{ url_for('uploaded_file', filename=meal.image_path) }}" class="meal-image" alt="{{ meal.name }}">
+                {% else %}
+                <div class="meal-image-placeholder">&#127858;</div>
+                {% endif %}
+                <div class="meal-info">
+                    <div class="meal-name">{{ meal.name }}</div>
+                    <div class="meal-meta">
+                        <span class="badge badge-{{ meal.meal_type }}">{{ meal.meal_type | capitalize }}</span>
+                        &middot; P: {{ "%.0f"|format(meal.protein) }}g &middot; K: {{ "%.0f"|format(meal.carbs) }}g &middot; F: {{ "%.0f"|format(meal.fat) }}g
+                    </div>
+                </div>
+                <div class="meal-calories">{{ "%.0f"|format(meal.calories) }} kcal</div>
+                <form method="POST" action="{{ url_for('delete_meal', meal_id=meal.id) }}" style="display:inline;">
+                    <button type="submit" class="meal-delete" title="Löschen" onclick="return confirm('Mahlzeit wirklich löschen?')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">&#127869;</div>
+                <p class="empty-text">Noch keine Mahlzeiten heute</p>
+                <a href="{{ url_for('add_meal') }}" class="btn btn-primary btn-sm">Erste Mahlzeit erfassen</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Week Chart -->
+    <div class="card">
+        <div class="card-title">Wochenverlauf</div>
+        <div class="chart-container">
+            <canvas id="weekChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Active Goals -->
+{% if goals %}
+<div class="card">
+    <div class="card-title">Aktive Ziele</div>
+    {% for goal in goals[:3] %}
+    <div class="goal-item">
+        <div class="goal-header">
+            <div class="goal-title">{{ goal.title }}</div>
+            <span style="font-size:0.75rem;color:var(--text-dim);">
+                {% if goal.end_date %}bis {{ goal.end_date.strftime('%d.%m.') }}{% endif %}
+            </span>
+        </div>
+        {% if goal.description %}
+        <div class="goal-desc">{{ goal.description }}</div>
+        {% endif %}
+        {% if goal.target_value %}
+        <div class="goal-progress">
+            <div class="goal-progress-fill" style="width: {{ [goal.current_value / goal.target_value * 100, 100] | min if goal.target_value else 0 }}%"></div>
+        </div>
+        <div class="goal-meta">
+            <span>{{ "%.0f"|format(goal.current_value) }} / {{ "%.0f"|format(goal.target_value) }} {{ goal.unit }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% if goals|length > 3 %}
+    <a href="{{ url_for('goals') }}" class="btn btn-secondary btn-sm mt-2">Alle Ziele anzeigen</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<a href="{{ url_for('add_meal') }}" class="fab" title="Mahlzeit erfassen">+</a>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const weekData = {{ week_data | tojson }};
+new Chart(document.getElementById('weekChart'), {
+    type: 'bar',
+    data: {
+        labels: weekData.map(d => d.date),
+        datasets: [
+            {
+                label: 'Kalorien',
+                data: weekData.map(d => d.calories),
+                backgroundColor: 'rgba(108, 92, 231, 0.6)',
+                borderColor: 'rgba(108, 92, 231, 1)',
+                borderWidth: 1,
+                borderRadius: 6,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(42,42,58,0.5)' },
+                ticks: { color: '#8888a0' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#8888a0' }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

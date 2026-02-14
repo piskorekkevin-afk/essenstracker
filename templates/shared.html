@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}s Fortschritt - EssenTracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div style="max-width:800px;margin:0 auto;padding:32px 16px;">
+        <div class="shared-header">
+            <div class="shared-avatar">{{ user.username[0]|upper }}</div>
+            <h1 class="page-title">{{ user.username }}s Fortschritt</h1>
+            <p class="page-subtitle">EssenTracker Tagesprofil</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card calories">
+                <div class="stat-label">Kalorien</div>
+                <div class="stat-value">{{ "%.0f"|format(totals.calories) }}</div>
+                <div class="stat-limit">von {{ "%.0f"|format(limits.calories) }} kcal</div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill" style="width:{{ [totals.calories / limits.calories * 100, 100] | min if limits.calories else 0 }}%"></div>
+                </div>
+            </div>
+            <div class="stat-card protein">
+                <div class="stat-label">Protein</div>
+                <div class="stat-value">{{ "%.0f"|format(totals.protein) }}g</div>
+                <div class="stat-limit">von {{ "%.0f"|format(limits.protein) }}g</div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill" style="width:{{ [totals.protein / limits.protein * 100, 100] | min if limits.protein else 0 }}%"></div>
+                </div>
+            </div>
+            <div class="stat-card carbs">
+                <div class="stat-label">Kohlenhydrate</div>
+                <div class="stat-value">{{ "%.0f"|format(totals.carbs) }}g</div>
+                <div class="stat-limit">von {{ "%.0f"|format(limits.carbs) }}g</div>
+            </div>
+            <div class="stat-card fat">
+                <div class="stat-label">Fett</div>
+                <div class="stat-value">{{ "%.0f"|format(totals.fat) }}g</div>
+                <div class="stat-limit">von {{ "%.0f"|format(limits.fat) }}g</div>
+            </div>
+        </div>
+
+        <!-- Today's Meals -->
+        <div class="card mb-3">
+            <div class="card-title">Heutige Mahlzeiten</div>
+            {% for meal in meals %}
+            <div class="meal-item">
+                {% if meal.image_path %}
+                <img src="{{ url_for('uploaded_file', filename=meal.image_path) }}" class="meal-image" alt="{{ meal.name }}">
+                {% else %}
+                <div class="meal-image-placeholder">&#127858;</div>
+                {% endif %}
+                <div class="meal-info">
+                    <div class="meal-name">{{ meal.name }}</div>
+                    <div class="meal-meta">
+                        <span class="badge badge-{{ meal.meal_type }}">{{ meal.meal_type | capitalize }}</span>
+                    </div>
+                </div>
+                <div class="meal-calories">{{ "%.0f"|format(meal.calories) }} kcal</div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p class="empty-text">Noch keine Mahlzeiten heute</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Week Chart -->
+        <div class="card mb-3">
+            <div class="card-title">Wochenverlauf</div>
+            <div class="chart-container">
+                <canvas id="weekChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Goals -->
+        {% if goals %}
+        <div class="card">
+            <div class="card-title">Aktive Ziele</div>
+            {% for goal in goals %}
+            <div class="goal-item">
+                <div class="goal-title">{{ goal.title }}</div>
+                {% if goal.target_value %}
+                <div class="goal-progress">
+                    <div class="goal-progress-fill" style="width:{{ [goal.current_value / goal.target_value * 100, 100] | min if goal.target_value else 0 }}%"></div>
+                </div>
+                <div class="goal-meta">
+                    <span>{{ "%.0f"|format(goal.current_value) }} / {{ "%.0f"|format(goal.target_value) }} {{ goal.unit }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <p class="text-center mt-3" style="color:var(--text-dim);font-size:0.8rem;">
+            Powered by <strong style="background:linear-gradient(135deg,var(--accent),var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">EssenTracker</strong>
+        </p>
+    </div>
+
+    <script>
+    const weekData = {{ week_data | tojson }};
+    new Chart(document.getElementById('weekChart'), {
+        type: 'bar',
+        data: {
+            labels: weekData.map(d => d.date),
+            datasets: [{
+                label: 'Kalorien',
+                data: weekData.map(d => d.calories),
+                backgroundColor: 'rgba(108, 92, 231, 0.6)',
+                borderColor: 'rgba(108, 92, 231, 1)',
+                borderWidth: 1,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(42,42,58,0.5)' }, ticks: { color: '#8888a0' } },
+                x: { grid: { display: false }, ticks: { color: '#8888a0' } }
+            }
+        }
+    });
+    </script>
+</body>
+</html>

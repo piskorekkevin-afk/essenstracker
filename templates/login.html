@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Anmelden - EssenTracker{% endblock %}
+{% block auth_content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">EssenTracker</h1>
+        <p class="auth-subtitle">Melde dich an, um deine Mahlzeiten zu tracken</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endwith %}
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">Benutzername</label>
+                <input type="text" name="username" class="form-input" placeholder="Dein Benutzername" required autofocus>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Passwort</label>
+                <input type="password" name="password" class="form-input" placeholder="Dein Passwort" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Anmelden</button>
+        </form>
+        <p class="auth-footer">Noch kein Konto? <a href="{{ url_for('register') }}">Registrieren</a></p>
+    </div>
+</div>
+{% endblock %}
