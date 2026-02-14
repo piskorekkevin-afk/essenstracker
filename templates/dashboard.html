@@ -58,7 +58,11 @@
 <div class="grid-2">
     <!-- Today's Meals -->
     <div class="card">
-        <div class="card-title">Heutige Mahlzeiten</div>
+        <div class="card-header" onclick="toggleCard(this)" data-card-id="meals">
+            <div class="card-title">Heutige Mahlzeiten</div>
+            <svg class="card-header-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="card-body" data-card-body="meals">
         {% if meals %}
             {% for meal in meals %}
             <div class="meal-item">
@@ -89,13 +93,19 @@
                 <a href="{{ url_for('add_meal') }}" class="btn btn-primary btn-sm">Erste Mahlzeit erfassen</a>
             </div>
         {% endif %}
+        </div>
     </div>
 
     <!-- Week Chart -->
     <div class="card">
-        <div class="card-title">Wochenverlauf</div>
-        <div class="chart-container">
-            <canvas id="weekChart"></canvas>
+        <div class="card-header" onclick="toggleCard(this)" data-card-id="week-chart">
+            <div class="card-title">Wochenverlauf</div>
+            <svg class="card-header-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="card-body" data-card-body="week-chart">
+            <div class="chart-container">
+                <canvas id="weekChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -103,7 +113,11 @@
 <!-- Active Goals -->
 {% if goals %}
 <div class="card">
-    <div class="card-title">Aktive Ziele</div>
+    <div class="card-header" onclick="toggleCard(this)" data-card-id="goals">
+        <div class="card-title">Aktive Ziele</div>
+        <svg class="card-header-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div class="card-body" data-card-body="goals">
     {% for goal in goals[:3] %}
     <div class="goal-item">
         <div class="goal-header">
@@ -128,6 +142,7 @@
     {% if goals|length > 3 %}
     <a href="{{ url_for('goals') }}" class="btn btn-secondary btn-sm mt-2">Alle Ziele anzeigen</a>
     {% endif %}
+    </div>
 </div>
 {% endif %}
 

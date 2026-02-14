@@ -107,6 +107,23 @@
     if (localStorage.getItem('sidebar-collapsed') === 'true') {
         document.getElementById('sidebar').classList.add('collapsed');
     }
+    // Collapsible cards
+    function toggleCard(headerEl) {
+        const cardId = headerEl.dataset.cardId;
+        const body = document.querySelector('[data-card-body="' + cardId + '"]');
+        const isCollapsed = headerEl.classList.toggle('collapsed');
+        body.classList.toggle('collapsed', isCollapsed);
+        localStorage.setItem('card-' + cardId, isCollapsed ? 'collapsed' : 'open');
+    }
+    // Restore card states
+    document.querySelectorAll('.card-header[data-card-id]').forEach(header => {
+        const cardId = header.dataset.cardId;
+        if (localStorage.getItem('card-' + cardId) === 'collapsed') {
+            header.classList.add('collapsed');
+            const body = document.querySelector('[data-card-body="' + cardId + '"]');
+            if (body) body.classList.add('collapsed');
+        }
+    });
     // Auto-dismiss flash messages
     document.querySelectorAll('.flash').forEach(el => {
         setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
