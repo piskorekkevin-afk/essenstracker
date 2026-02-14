@@ -140,9 +140,9 @@ Heutige Werte / Tageslimits:
 
 Antworte NUR mit einem JSON-Array (kein Markdown) in diesem Format:
 [
-    {{"name": "Name", "description": "Beschreibung und warum es passt", "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0}}
+    {{"name": "Name", "description": "Beschreibung und warum es passt", "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0, "recipe": "Schritt-für-Schritt Rezept mit Zutaten und Mengenangaben. Trenne die Schritte mit Zeilenumbrüchen (\\n)."}}
 ]
-Die Vorschläge sollen abwechslungsreich sein und die noch fehlenden Nährwerte ergänzen."""
+Die Vorschläge sollen abwechslungsreich sein und die noch fehlenden Nährwerte ergänzen. Jeder Vorschlag MUSS ein vollständiges, einfach nachzukochendes Rezept mit konkreten Zutaten und Mengenangaben enthalten."""
 
         message = client.messages.create(
             model="claude-sonnet-4-5-20250929",

@@ -35,7 +35,8 @@ async function loadSuggestions() {
         }
 
         let html = '';
-        data.forEach(s => {
+        data.forEach((s, i) => {
+            const recipeHtml = s.recipe ? s.recipe.replace(/\n/g, '<br>') : '';
             html += `
             <div class="suggestion-card">
                 <div class="suggestion-name">${s.name}</div>
@@ -47,6 +48,13 @@ async function loadSuggestions() {
                     <span class="suggestion-nutrient"><strong>${s.fat || 0}g</strong> Fett</span>
                     <span class="suggestion-nutrient"><strong>${s.fiber || 0}g</strong> Ballaststoffe</span>
                 </div>
+                ${recipeHtml ? `
+                <div class="suggestion-recipe mt-2">
+                    <button class="btn btn-secondary btn-sm" onclick="toggleRecipe(${i})">Rezept anzeigen</button>
+                    <div class="recipe-content" id="recipe-${i}" style="display:none;">
+                        <p>${recipeHtml}</p>
+                    </div>
+                </div>` : ''}
             </div>`;
         });
         container.innerHTML = html;
@@ -61,5 +69,17 @@ async function loadSuggestions() {
     }
 }
 loadSuggestions();
+
+function toggleRecipe(index) {
+    const el = document.getElementById('recipe-' + index);
+    const btn = el.previousElementSibling;
+    if (el.style.display === 'none') {
+        el.style.display = 'block';
+        btn.textContent = 'Rezept ausblenden';
+    } else {
+        el.style.display = 'none';
+        btn.textContent = 'Rezept anzeigen';
+    }
+}
 </script>
 {% endblock %}

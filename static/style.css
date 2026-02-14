@@ -41,36 +41,37 @@ body {
     position: relative;
 }
 
-/* ── Food Background Pattern ─────────────────────────────────── */
-body::before {
-    content: '';
+/* ── Food Background Collage ──────────────────────────────────── */
+.food-bg {
     position: fixed;
     inset: 0;
-    background-image:
-        radial-gradient(circle at 10% 20%, rgba(255, 107, 53, 0.04) 0%, transparent 50%),
-        radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.04) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(243, 156, 18, 0.03) 0%, transparent 50%);
-    z-index: 0;
-    pointer-events: none;
-}
-
-body::after {
-    content: '🍕 🥗 🍜 🍎 🥑 🍳 🥘 🍰 🥝 🍇 🌮 🍣 🥐 🫑 🍊 🥕 🍓 🧁 🍝 🥦';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    font-size: 2.2rem;
-    line-height: 5rem;
-    letter-spacing: 3rem;
-    word-spacing: 2rem;
-    white-space: break-spaces;
-    opacity: 0.06;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
-    padding: 2rem;
+}
+
+.food-bg img {
+    position: absolute;
+    border-radius: 16px;
+    object-fit: cover;
+    opacity: 0.10;
+    filter: saturate(1.2);
+}
+
+.food-bg img:nth-child(1) { width: 280px; height: 200px; top: 2%; left: 3%; transform: rotate(-4deg); }
+.food-bg img:nth-child(2) { width: 240px; height: 180px; top: 5%; right: 5%; transform: rotate(3deg); }
+.food-bg img:nth-child(3) { width: 260px; height: 190px; top: 35%; left: 8%; transform: rotate(2deg); }
+.food-bg img:nth-child(4) { width: 250px; height: 180px; top: 40%; right: 3%; transform: rotate(-3deg); }
+.food-bg img:nth-child(5) { width: 270px; height: 200px; bottom: 5%; left: 5%; transform: rotate(3deg); }
+.food-bg img:nth-child(6) { width: 240px; height: 170px; bottom: 8%; right: 8%; transform: rotate(-2deg); }
+.food-bg img:nth-child(7) { width: 220px; height: 160px; top: 18%; left: 40%; transform: rotate(1deg); }
+.food-bg img:nth-child(8) { width: 230px; height: 170px; bottom: 30%; left: 35%; transform: rotate(-1deg); }
+
+.food-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, var(--bg) 75%);
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────── */
@@ -843,6 +844,23 @@ textarea.form-input {
 }
 
 .suggestion-nutrient strong {
+    color: var(--text);
+}
+
+/* ── Recipe Section ──────────────────────────────────────────── */
+.suggestion-recipe {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.recipe-content {
+    margin-top: 12px;
+    padding: 16px 20px;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    line-height: 1.8;
     color: var(--text);
 }
 
